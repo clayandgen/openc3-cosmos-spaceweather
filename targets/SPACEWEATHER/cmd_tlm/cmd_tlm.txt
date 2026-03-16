@@ -1,0 +1,88 @@
+COMMAND <%= target_name %> GET_ALERTS BIG_ENDIAN "Get Alert data from the NOAA SWPC space weather alerts API"
+  ACCESSOR openc3/accessors/http_accessor.py
+  PARAMETER HTTP_PATH 0 0 DERIVED nil nil "/products/alerts.json"
+  PARAMETER HTTP_METHOD 0 0 DERIVED nil nil "GET"
+  PARAMETER HTTP_PACKET 0 0 DERIVED nil nil "ALERTS_RESPONSE"
+  PARAMETER HTTP_ERROR_PACKET 0 0 DERIVED nil nil "ERROR_RESPONSE"
+
+COMMAND <%= target_name %> GET_SCALES BIG_ENDIAN "Get current NOAA Space Weather Scales (R/S/G) and 3-day forecast"
+  ACCESSOR openc3/accessors/http_accessor.py
+  PARAMETER HTTP_PATH 0 0 DERIVED nil nil "/products/noaa-scales.json"
+  PARAMETER HTTP_METHOD 0 0 DERIVED nil nil "GET"
+  PARAMETER HTTP_PACKET 0 0 DERIVED nil nil "SCALES_RESPONSE"
+  PARAMETER HTTP_ERROR_PACKET 0 0 DERIVED nil nil "ERROR_RESPONSE"
+
+TELEMETRY <%= target_name %> ALERTS_RESPONSE BIG_ENDIAN "Alerts response from NOAA SWPC API"
+  ACCESSOR openc3/accessors/http_accessor.py openc3/accessors/json_accessor.py
+  TEMPLATE '[{"product_id":"","issue_datetime":"","message":""}]'
+  ITEM HTTP_STATUS 0 0 DERIVED "HTTP response status code"
+  APPEND_ID_ITEM PRODUCT_ID 64 STRING "Alert product classification code" "ALERTS"
+    KEY $[0].product_id
+  APPEND_ITEM ISSUE_DATETIME 192 STRING "Alert issue timestamp"
+    KEY $[0].issue_datetime
+  APPEND_ITEM MESSAGE 12800 STRING "Full space weather alert message text"
+    KEY $[0].message
+
+TELEMETRY <%= target_name %> SCALES_RESPONSE BIG_ENDIAN "NOAA Space Weather Scales response"
+  ACCESSOR openc3/accessors/http_accessor.py openc3/accessors/json_accessor.py
+  TEMPLATE '{"0":{"DateStamp":"","TimeStamp":"","R":{"Scale":"0","Text":"none","MinorProb":null,"MajorProb":null},"S":{"Scale":"0","Text":"none","Prob":null},"G":{"Scale":"0","Text":"none"}},"1":{"DateStamp":"","TimeStamp":"","R":{"MinorProb":"0","MajorProb":"0"},"S":{"Prob":"0"},"G":{"Scale":"0","Text":"none"}},"2":{"DateStamp":"","TimeStamp":"","R":{"MinorProb":"0","MajorProb":"0"},"S":{"Prob":"0"},"G":{"Scale":"0","Text":"none"}},"3":{"DateStamp":"","TimeStamp":"","R":{"MinorProb":"0","MajorProb":"0"},"S":{"Prob":"0"},"G":{"Scale":"0","Text":"none"}}}'
+  ITEM HTTP_STATUS 0 0 DERIVED "HTTP response status code"
+  # Current conditions (key "0")
+  APPEND_ID_ITEM CURRENT_DATESTAMP 80 STRING "Current observation date" "SCALES"
+    KEY $.0.DateStamp
+  APPEND_ITEM CURRENT_TIMESTAMP 64 STRING "Current observation time"
+    KEY $.0.TimeStamp
+  APPEND_ITEM R_SCALE 8 STRING "Current Radio Blackout scale (0-5)"
+    KEY $.0.R.Scale
+  APPEND_ITEM R_TEXT 80 STRING "Current Radio Blackout severity text"
+    KEY $.0.R.Text
+  APPEND_ITEM S_SCALE 8 STRING "Current Solar Radiation Storm scale (0-5)"
+    KEY $.0.S.Scale
+  APPEND_ITEM S_TEXT 80 STRING "Current Solar Radiation Storm severity text"
+    KEY $.0.S.Text
+  APPEND_ITEM G_SCALE 8 STRING "Current Geomagnetic Storm scale (0-5)"
+    KEY $.0.G.Scale
+  APPEND_ITEM G_TEXT 80 STRING "Current Geomagnetic Storm severity text"
+    KEY $.0.G.Text
+  # Today forecast (key "1")
+  APPEND_ITEM TODAY_R_MINOR_PROB 24 STRING "Today R minor storm probability %"
+    KEY $.1.R.MinorProb
+  APPEND_ITEM TODAY_R_MAJOR_PROB 24 STRING "Today R major storm probability %"
+    KEY $.1.R.MajorProb
+  APPEND_ITEM TODAY_S_PROB 24 STRING "Today S storm probability %"
+    KEY $.1.S.Prob
+  APPEND_ITEM TODAY_G_SCALE 8 STRING "Today predicted G scale (0-5)"
+    KEY $.1.G.Scale
+  APPEND_ITEM TODAY_G_TEXT 80 STRING "Today predicted G severity text"
+    KEY $.1.G.Text
+  # Tomorrow forecast (key "2")
+  APPEND_ITEM TOMORROW_DATE 80 STRING "Tomorrow forecast date"
+    KEY $.2.DateStamp
+  APPEND_ITEM TOMORROW_R_MINOR_PROB 24 STRING "Tomorrow R minor storm probability %"
+    KEY $.2.R.MinorProb
+  APPEND_ITEM TOMORROW_R_MAJOR_PROB 24 STRING "Tomorrow R major storm probability %"
+    KEY $.2.R.MajorProb
+  APPEND_ITEM TOMORROW_S_PROB 24 STRING "Tomorrow S storm probability %"
+    KEY $.2.S.Prob
+  APPEND_ITEM TOMORROW_G_SCALE 8 STRING "Tomorrow predicted G scale (0-5)"
+    KEY $.2.G.Scale
+  APPEND_ITEM TOMORROW_G_TEXT 80 STRING "Tomorrow predicted G severity text"
+    KEY $.2.G.Text
+  # Day after tomorrow forecast (key "3")
+  APPEND_ITEM DAY3_DATE 80 STRING "Day 3 forecast date"
+    KEY $.3.DateStamp
+  APPEND_ITEM DAY3_R_MINOR_PROB 24 STRING "Day 3 R minor storm probability %"
+    KEY $.3.R.MinorProb
+  APPEND_ITEM DAY3_R_MAJOR_PROB 24 STRING "Day 3 R major storm probability %"
+    KEY $.3.R.MajorProb
+  APPEND_ITEM DAY3_S_PROB 24 STRING "Day 3 S storm probability %"
+    KEY $.3.S.Prob
+  APPEND_ITEM DAY3_G_SCALE 8 STRING "Day 3 predicted G scale (0-5)"
+    KEY $.3.G.Scale
+  APPEND_ITEM DAY3_G_TEXT 80 STRING "Day 3 predicted G severity text"
+    KEY $.3.G.Text
+
+TELEMETRY <%= target_name %> ERROR_RESPONSE BIG_ENDIAN "Error response from NOAA SWPC API"
+  ACCESSOR openc3/accessors/http_accessor.py
+  ITEM HTTP_STATUS 0 0 DERIVED "HTTP response status code"
+  APPEND_ITEM BODY 4096 STRING "Raw error response body"

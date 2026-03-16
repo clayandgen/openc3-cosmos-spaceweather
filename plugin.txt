@@ -1,0 +1,22 @@
+# Set VARIABLEs here to allow variation in your plugin
+
+VARIABLE spaceweather_target_name SPACEWEATHER 
+VARIABLE_DESCRIPTION "Target name for the Space Weather plugin"
+VARIABLE hostname services.swpc.noaa.gov
+VARIABLE_DESCRIPTION "API hostname"
+VARIABLE protocol https
+VARIABLE_DESCRIPTION "Protocol for the API (https)"
+VARIABLE port 443
+VARIABLE_DESCRIPTION "Port for the API"
+VARIABLE poll_period 3600
+VARIABLE_DESCRIPTION "Polling interval in seconds (default 3600 = 60 minutes, 0 to disable)"
+
+TARGET SPACEWEATHER <%= spaceweather_target_name %>
+INTERFACE <%= spaceweather_target_name %>_INT openc3/interfaces/http_client_interface.py <%= hostname %> <%= port %> <%= protocol %> 5.0 5.0
+  MAP_TARGET <%= spaceweather_target_name %>
+  <% if poll_period.to_f > 0.0 %>
+  OPTION PERIODIC_CMD DONT_LOG <%= poll_period %> "<%= spaceweather_target_name %> GET_ALERTS"
+  OPTION PERIODIC_CMD DONT_LOG <%= poll_period %> "<%= spaceweather_target_name %> GET_SCALES"
+  <% end %>
+
+WIDGET Spaceweather
