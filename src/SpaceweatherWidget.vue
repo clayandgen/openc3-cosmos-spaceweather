@@ -28,9 +28,8 @@
       </div>
     </div>
 
-    <!-- Loading state -->
     <div v-if="!scalesLoaded" class="text-center py-8 text-medium-emphasis font-italic">
-      Waiting for space weather data&hellip;
+      No telemetry values found, click "Refresh Now" or send the GET_ALERTS / GET_SCALES commands to receive latest Space Weather data
     </div>
 
     <template v-else>
@@ -50,6 +49,25 @@
       <!-- 3-Day Forecast -->
       <forecast-table :forecast="forecast" />
 
+      <!-- Add to Calendar (Enterprise only) -->
+      <template v-if="enterprise">
+        <div class="d-flex justify-end mb-3">
+          <v-btn
+            size="small"
+            variant="tonal"
+            prepend-icon="mdi-calendar-plus"
+            @click="showCreateActivities = true"
+          >
+            Add Forecast to Calendar
+          </v-btn>
+        </div>
+        <create-forecast-activities
+          v-model="showCreateActivities"
+          :forecast="forecast"
+          :scales="scales"
+        />
+      </template>
+
       <!-- Latest Alert -->
       <latest-alert
         :alert="alert"
@@ -62,10 +80,11 @@
 <script>
 import { Widget } from '@openc3/vue-common/widgets'
 import { TimeFilters } from '@openc3/vue-common/util'
-import { OpenC3Api } from '@openc3/js-common/services'
+import { Api, OpenC3Api } from '@openc3/js-common/services'
 import ScaleCard from './ScaleCard'
 import ForecastTable from './ForecastTable'
 import LatestAlert from './LatestAlert'
+import CreateForecastActivities from './CreateForecastActivities'
 
 const SCALE_IMPACTS = {
   R: [
@@ -103,7 +122,7 @@ const SCALE_DESCRIPTIONS = {
 }
 
 export default {
-  components: { ScaleCard, ForecastTable, LatestAlert },
+  components: { ScaleCard, ForecastTable, LatestAlert, CreateForecastActivities },
   mixins: [Widget, TimeFilters],
   data() {
     return {
@@ -118,6 +137,8 @@ export default {
         day3: { date: null, rMinor: null, rMajor: null, sProb: null, gScale: null, gText: null },
       },
       alert: { productId: null, dateTime: null, message: null },
+      enterprise: false,
+      showCreateActivities: false,
       refreshing: false,
       api: null,
       target: 'SPACEWEATHER',
@@ -163,6 +184,9 @@ export default {
   created() {
     this.api = new OpenC3Api()
     this.target = this.parameters[0] || 'SPACEWEATHER'
+    Api.get('/openc3-api/info').then(({ data }) => {
+      this.enterprise = data.enterprise
+    }).catch(() => {})
     this.update()
     this.updater = setInterval(() => this.update(), 3600000)
   },

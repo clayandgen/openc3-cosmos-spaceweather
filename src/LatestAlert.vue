@@ -53,7 +53,7 @@ export default {
 .alert-message {
   white-space: pre-wrap;
   word-wrap: break-word;
-  max-height: 200px;
+  max-height: 400px;
   overflow-y: auto;
   opacity: 0.85;
   font-family: 'Roboto Mono', monospace;

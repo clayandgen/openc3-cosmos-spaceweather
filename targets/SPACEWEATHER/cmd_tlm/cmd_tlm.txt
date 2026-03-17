@@ -32,16 +32,19 @@ TELEMETRY <%= target_name %> SCALES_RESPONSE BIG_ENDIAN "NOAA Space Weather Scal
     KEY $.0.DateStamp
   APPEND_ITEM CURRENT_TIMESTAMP 64 STRING "Current observation time"
     KEY $.0.TimeStamp
-  APPEND_ITEM R_SCALE 8 STRING "Current Radio Blackout scale (0-5)"
+  APPEND_ITEM R_SCALE 8 UINT "Current Radio Blackout scale (0-5)"
     KEY $.0.R.Scale
+    LIMITS DEFAULT 1 ENABLED -1 -1 1 3
   APPEND_ITEM R_TEXT 80 STRING "Current Radio Blackout severity text"
     KEY $.0.R.Text
-  APPEND_ITEM S_SCALE 8 STRING "Current Solar Radiation Storm scale (0-5)"
+  APPEND_ITEM S_SCALE 8 UINT "Current Solar Radiation Storm scale (0-5)"
     KEY $.0.S.Scale
+    LIMITS DEFAULT 1 ENABLED -1 -1 1 3
   APPEND_ITEM S_TEXT 80 STRING "Current Solar Radiation Storm severity text"
     KEY $.0.S.Text
-  APPEND_ITEM G_SCALE 8 STRING "Current Geomagnetic Storm scale (0-5)"
+  APPEND_ITEM G_SCALE 8 UINT "Current Geomagnetic Storm scale (0-5)"
     KEY $.0.G.Scale
+    LIMITS DEFAULT 1 ENABLED -1 -1 1 3
   APPEND_ITEM G_TEXT 80 STRING "Current Geomagnetic Storm severity text"
     KEY $.0.G.Text
   # Today forecast (key "1")

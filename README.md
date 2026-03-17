@@ -1,6 +1,8 @@
 # OpenC3 COSMOS Space Weather Plugin
 
-![Space Weather](public/store_img.png)
+<p align="center">
+  <img src="public/store_img.png" alt="Space Weather" />
+</p>
 
 An OpenC3 COSMOS plugin that provides real-time space weather monitoring using NOAA Space Weather Prediction Center (SWPC) APIs.
 
